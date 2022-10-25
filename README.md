@@ -33,6 +33,34 @@ Four coherence measures are computed for each topic model. The measures are: UCI
 
 Run the following line to compute the coherence of a given set of topic models:
 
-- python coherency_\[model\_name\] \\[t\]
+- python coherency_\[model\_name\] \[t\]
 
-where "model\_name" refers to either "lda" or "bertopic" and "t" refers to the topic size.
+where "model\_name" refers to either "lda" or "bertopic" and "t" refers to the topic size. The model coherencies will be saved in the corresponding models folder (e.g. LDA model coherency in "lda\_coherencies"). The coherencies are saved as Pickle objects so that they can be loaded with ease.
+
+## 4. Classifier Training
+
+Logistic Regression and Decision Tree classifiers are trained for each topic model. The classifiers are trained to classify five categories from the arXiv dataset. The arXiv dataset has an imbalanced amount of articles per category. However, the preprocessing in step 1 has already taken this into account and balanced the dataset.
+
+Classifier training between the two topic models is separate. The LDA classifiers can be trained without further processing. The BERTopic classifiers, however, require a separate prediction script due to the time it takes. Both training scripts are placed under the "classifier\_scripts" folder.
+
+For simplicity, only the results of the classifiers are saved. After each training, a five-fold cross-validation is run to evaluate the performance of the classifiers. The cross-validation score is then kept under the corresponding file. For instance, the LDA classifier scores are written in the "lda\_classification\_results.txt" file. This file is later used for the analysis.
+
+### LDA Classifier
+
+To get the LDA classifier results, first navigate to the "lda\_classifiers" folder. Run the following line to compute the classifier performance for LDA:
+
+- python lda_\[c\]_classifier.py \[t\]
+
+where "c" refers to either "dt" (decision trees) or "logreg" (logistic regression), and "t" refers to the topic size. As stated, this writes the results in the "lda_classification_results.txt" file.
+
+ ### BERTopic Classifier Results
+
+To get the results of the BERTopic classifiers, navigate to the "bertopic_classifiers" folder. First, run the following code to get the necessary predictions for the classifiers:
+
+- python bertopic_transformer.py \[t\] \[s\]
+
+where "t" refers to the topic size and "s" refers to the model number. Once you have all the predictions you need, run the following code to get the classifier results:
+
+- python bertopic_\[c\]_classifier.py \[t\]
+
+where "c" refers to either "dt" (decision trees) or "logreg" (logistic regression, and "t" refers to the topic size. This then writes the classifier results into the "bertopic_class_results.txt" file.

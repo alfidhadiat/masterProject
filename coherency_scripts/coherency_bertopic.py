@@ -84,7 +84,7 @@ if __name__ == '__main__':
             with open('bertopic_coherency_results.txt', 'a') as results:
                 results.write(f"{n_topics},{model_number},{measure},{mean_coh}\n")
 
-            topic_coh_dir = f"/data/s2863685/coherency/bertopic/seperate_coherency/b{n_topics}_coh"
+            topic_coh_dir = f"bertopic_coherencies"
             topic_dir = f"/b{n_topics}_{model_number}_{measure}.pkl"
             tc_path = topic_coh_dir + topic_dir
             with open(tc_path, 'wb') as f:

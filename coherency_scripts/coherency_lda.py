@@ -84,7 +84,7 @@ if __name__ == '__main__':
             with open("lda_coherence_results.txt", "a") as results:
                 results.write(f"{n_topics},{model_number},{coh},{mean_coh}\n")
 
-            topic_coh_dir = f"/data/s2863685/coherency/lda/l{n_topics}_coh"
+            topic_coh_dir = f"lda_coherencies"
             topic_dir = f"/l{n_topics}_{model_number}_{coh}.pkl"
             tc_path = topic_coh_dir + topic_dir
             with open(tc_path, 'wb') as f:

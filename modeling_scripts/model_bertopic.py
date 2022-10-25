@@ -45,11 +45,12 @@ model = BERTopic(
         vectorizer_model = tf_vectorizer,
         language = 'english',
         verbose = True,
+        calculate_probabilities = True, 
         min_topic_size = 50,
 	nr_topics = n_topics)
 
 model.fit(df['abstract'])
 
-model_name = f"bertopic_models/bertopic_{n_topics}topics_{model_number}"
+model_name = f"bertopic_models/bertopic{n_topics}_{model_number}"
 model.save(model_name)
 
