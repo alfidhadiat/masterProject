@@ -6,22 +6,20 @@
 ##########
 
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score, cross_val_predict
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report, log_loss
+from sklearn.feature_selection import f_classif
+from sklearn.preprocessing import StandardScaler
+from scipy import stats
 from time import time
 import pandas as pd
 import numpy as np
-import argparse
 import pickle 
 import joblib
+import sys
 
-####################
-# Argument Parsing
-####################
-
-parser = argparse.ArgumentParser(description = 'Train a Logistic Regression classifier for the arXiv dataset using LDA features')
-parser.add_argument('topic_size', metavar = 't', type = int, help = 'integer: size of topic')
-args = parser.parse_args()
+import matplotlib.pyplot as plt
 
 #############
 # Functions
@@ -70,6 +68,11 @@ def keep_40k_categories(df: pd.DataFrame) -> pd.DataFrame:
     print(f"done in {time() - t0:.2f} seconds")
     return df
 
+def keep_main_cats(df: pd.DataFrame):
+    keep_cats = ['cs', 'math', 'cond-mat', 'astro-ph', 'physics']
+    df = df[df['first_category'].isin(keep_cats)]
+    return df
+
 def load_arxiv_data(path: str, amount: int = None) -> pd.DataFrame:
     with open(path, 'rb') as f:
         df = pd.DataFrame(pickle.load(f))
@@ -82,47 +85,80 @@ def load_tf_lda_models(tf_path: str, lda_path: str):
     lda = joblib.load(lda_path)
     return tf, lda
 
+def load_lda_topic_coherency():
+    with open("lda_coh_per_topics.pkl", "rb") as f:
+        lda_topic_coh = pickle.load(f)
+    return lda_topic_coh
+
 def crossval_linreg(X: list, y: list, cv: int = 5):
     lr = LogisticRegression(multi_class = 'multinomial', solver = 'lbfgs')
     return cross_val_score(lr, X, y, cv = cv)
+
+def crossval_dt(X: list, y: list, cv: int = 5):
+    dt = DecisionTreeClassifier()
+    return cross_val_score(dt, X, y, cv = cv)
 
 def crossval_confusion_linreg(X: list, y: list, cv: int = 5):
     lr = LogisticRegression(multi_class = 'multinomial', solver = 'lbfgs')
     y_pred = cross_val_predict(lr, X, y, cv = cv)
     return confusion_matrix(y, y_pred)
-    
+
+def train_save_linreg(X: list, y: list, path: str):
+    lr = LogisticRegression(multi_class = 'multinomial', solver = 'lbfgs')
+    lr.fit(tf_lda, cats)
+    with open(path, 'wb') as f:
+        pickle.dump(lr, f)
+    print(f"Linear regression saved as {path}")
+
+def load_linreg_model(path: str):
+    with open(path, 'rb') as f:
+        lr = pickle.load(f)
+    return lr
+
+def load_topic_coherences(path: str):
+    with open(path, 'rb') as f:
+        topic_coh = pickle.load(f)
+    return topic_coh
+
+def make_scatterplot(x: list, y: list, label: list):
+    plt.scatter(x, y)
+    plt.xlabel(label[0])
+    plt.ylabel(label[1])
+    plt.show()
+
 #################
 # Main Function
 #################
 
 if __name__ == '__main__':
 
-    # Argument parsing
-    n_topics = args.topic_size
-    
-    # Load data
-    df = load_arxiv_data("../dataset/beyond_2018_archive.pkl")
-    cats = grab_first_cats(df)
+    # Loop through all feature importance scores
+    for classifier in ['lr', 'dt']:
+        for tm in ['l', 'b']:
 
-    # Train and cross validate in loops
-    for model_number in range(1, 6):
+            print('============')
+            print(f"{tm} {classifier}")
 
-        # Load models
-        model_path = f"../modeling_scripts/lda_models"
-        tf_dir = f"lda_models/tf_{n_topics}topics_{model_number}.joblib"
-        lda_dir = f"lda_models/lda_{n_topics}topics_{model_number}.joblib"
-        tf_path = model_path + tf_dir
-        lda_path = model_path + lda_dir
-        tf, lda = load_tf_lda_models(tf_path, lda_path)
+            # Load feat. imp. scores
+            df = pd.read_csv(f'feature_importances/featcoh_{tm}_{classifier}.csv', index_col = 0)
+            df = df.sort_index()
 
-        # Transform dataset
-        tf_abstracts = tf.transform(df['abstract'])
-        tf_lda = lda.transform(tf_abstracts)
-
-        # Cross validate 
-        scores = crossval_linreg(tf_lda, cats)
-        mean_score = np.mean(scores)
-
-        # Save results
-        with open('lda_class_results.txt', 'a') as result:
-            result.write(f"{n_topics},{model_number},linear_regression,{mean_score}\n")
+            # Spearman Rho between feat. imp. and coherence measure
+            coh_meas = ['u_mass', 'c_uci', 'c_npmi', 'c_v']
+            folder_dir = f'../coherency_scripts/coherency_scores/{tm}100_coh'
+            for coh in coh_meas:
+                coh_dir = folder_dir + f"/{tm}100_1_{coh}.pkl"
+                cohs = pickle.load(open(coh_dir, 'rb'))
+                df[coh] = cohs
+                r_val, p_val = stats.spearmanr(df.iloc[:, 1], cohs)
+                print(coh)
+                if p_val < 0.001:
+                    print(f"{p_val:.4f} ***")
+                elif p_val < 0.01:
+                    print(f"{p_val:.4f} **")
+                elif p_val < 0.05:
+                    print(f"{p_val:.4f} *")
+                else:
+                    print(f"{p_val:.4f} -")
+                print(f"{r_val:.4f}")
+                print('-----------')

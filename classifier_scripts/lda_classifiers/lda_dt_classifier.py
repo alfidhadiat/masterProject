@@ -119,5 +119,5 @@ if __name__ == '__main__':
         mean_score = np.mean(scores)
 
         # Save results
-        with open('lda_classification_results.txt', 'a') as result:
+        with open('lda_class_results.txt', 'a') as result:
             result.write(f"{n_topics},{model_number},crossval_dt,{mean_score}\n")

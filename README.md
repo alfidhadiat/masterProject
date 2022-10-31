@@ -51,7 +51,7 @@ To get the LDA classifier results, first navigate to the "lda\_classifiers" fold
 
 - python lda_\[c\]_classifier.py \[t\]
 
-where "c" refers to either "dt" (decision trees) or "logreg" (logistic regression), and "t" refers to the topic size. As stated, this writes the results in the "lda_classification_results.txt" file.
+where "c" refers to either "dt" (decision trees) or "logreg" (logistic regression), and "t" refers to the topic size. As stated, this writes the results in the "lda_class_results.txt" file.
 
  ### BERTopic Classifier Results
 
@@ -64,3 +64,16 @@ where "t" refers to the topic size and "s" refers to the model number. Once you 
 - python bertopic_\[c\]_classifier.py \[t\]
 
 where "c" refers to either "dt" (decision trees) or "logreg" (logistic regression, and "t" refers to the topic size. This then writes the classifier results into the "bertopic_class_results.txt" file.
+
+## 5. Analysis Scripts
+
+With all the model trains, the final analysis can now be conducted. Two analyses are done for the research project. First, a correlation between the topic model coherency scores and the classifier accuracy scores. Second, correlations between individual topic coherency scores and classifier feature importance scores. Separate scripts are created for each correlation.
+
+### Accuracy-Coherence Correlation
+To get the accuracy-coherence correlation, navigate to the "analysis_scripts" directory first. Run the following line:
+
+- python acc_coh_analyzer.py
+
+All correlations between each topic amount and classifier are then printed. These prints are the results of this particular correlation.
+
+### Feature Importance - Topic Coherence Correlation

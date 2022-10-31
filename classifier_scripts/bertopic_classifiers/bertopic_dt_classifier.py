@@ -5,7 +5,7 @@
 # Imports
 ##########
 
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn.metrics import confusion_matrix, classification_report
 from time import time
@@ -116,4 +116,4 @@ if __name__ == '__main__':
 
         # Save results
         with open('bertopic_class_results.txt', 'a') as result:
-            result.write(f"{n_topic},{n_model},decision_trees,{mean_score}\n")
+            result.write(f"{n_topic},{n_model},linear_regression,{mean_score}\n")
