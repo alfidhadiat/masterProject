@@ -67,7 +67,7 @@ where "c" refers to either "dt" (decision trees) or "logreg" (logistic regressio
 
 ## 5. Analysis Scripts
 
-With all the model trains, the final analysis can now be conducted. Two analyses are done for the research project. First, a correlation between the topic model coherency scores and the classifier accuracy scores. Second, correlations between individual topic coherency scores and classifier feature importance scores. Separate scripts are created for each correlation.
+With all the model trains, the final analysis can now be conducted. Two analyses are done for the research project. First, a correlation between the topic model coherency scores and the classifier accuracy scores. Second, correlations between individual topic coherency scores and classifier feature importance scores. Separate scripts are created for each correlation. Furthermore, the final script requires the output of the separate correlation scripts to attain the final result. 
 
 ### Accuracy-Coherence Correlation
 To get the accuracy-coherence correlation, navigate to the "analysis_scripts" directory first. Run the following line:
@@ -77,3 +77,15 @@ To get the accuracy-coherence correlation, navigate to the "analysis_scripts" di
 All correlations between each topic amount and classifier are then printed. These prints are the results of this particular correlation.
 
 ### Feature Importance - Topic Coherence Correlation
+
+To get the feature importance correlations, several scripts must be run. For each topic model, there is a separate "analysis" folder. navigate to each folder (i.e. "lda_analysis", "bert_analysis") and run all Python scripts beginning with "featcoh". To do so, go to the topic model analysis directory and run the following line:
+
+- python featcoh_\[tm\]_\[c\].py
+
+where "tm" refers to "bertopic" or "lda", and "c" refers to either "dt" or "logreg". The results of the analyses are placed on CSV files in a folder marked as "feature_importances".
+
+Once all four feature importance scores have been calculated, return to the "analysis_scripts" folder. There, run the following line:
+
+- python feat_coh_analyser.py
+
+This file prints out the correlations between each topic score for a 100-topic model and the classifier's corresponding feature importance score.
